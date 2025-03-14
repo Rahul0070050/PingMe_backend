@@ -1,30 +1,19 @@
-import Knex from "knex";
+import { config } from "../../../config/config";
 import { CONFIG } from "../../../types/config";
-export default function connection(config: CONFIG) {
-  function connectToPG() {
-    const knex = Knex({
-      client: "pg",
-      connection: {
-        host: config.pg.uri,
-        user: config.pg.user,
-        password: config.pg.password,
-        database: config.pg.database,
-      },
-    });
-    console.log(config.pg.password);
+import { Sequelize } from "sequelize";
 
-    knex
-      .raw("SELECT 1")
-      .then(() => {
-        console.log("PostgreSQL connected");
-      })
-      .catch((e) => {
-        console.log("PostgreSQL not connected");
-        console.error(e);
-      });
+const sequelize = new Sequelize(config.pg.uri, {
+  dialect: "postgres",
+  logging: false,
+});
+
+export async function connection() {
+  try {
+    await sequelize.authenticate();
+    console.log("Connected to PostgreSQL successfully!");
+  } catch (error) {
+    console.error("Unable to connect to the database:", error);
   }
-
-  return {
-    connectToPG,
-  };
 }
+
+export default sequelize;
