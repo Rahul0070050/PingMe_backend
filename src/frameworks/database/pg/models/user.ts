@@ -30,7 +30,6 @@ const User = sequelize.define("User", {
     type: DataTypes.INTEGER,
     validate: {
       min: 10,
-      max: 12,
     },
   },
   bio: {

@@ -1,8 +1,8 @@
 import Jwt from "jsonwebtoken";
 import { JwtPayload } from ".";
 
-export type USER = {
-  id: number;
+export type User = {
+  id: string;
   username: string;
   email: string;
   profile?: string;
@@ -19,16 +19,18 @@ export type USER = {
   password: string;
 };
 
-export type UserRepositoryDb = {
-  create: (user: USER) => Promise<boolean | string>;
-  findByUsername: (username: string) => Promise<USER | null>;
-  updateUser: (params: USER) => Promise<boolean | string>;
-};
+export interface UserRepositoryDb {
+  create: (user: User) => Promise<boolean | string>;
+  findByUsername: (username: string) => Promise<User | null>;
+  findByEmail: (email: string) => Promise<User | null>;
+  updateUser: (params: User) => Promise<boolean | string>;
+}
 
 export interface UserApplicationRepository {
-  findByUsername: (username: string) => Promise<USER | null>;
-  createUser: (user: USER) => Promise<boolean | string>;
-  updateUser: (params: USER) => Promise<boolean | string>;
+  findByUsername: (username: string) => Promise<User | null>;
+  findByEmail: (email: string) => Promise<User | null>;
+  createUser: (user: User) => Promise<boolean | string>;
+  updateUser: (params: User) => Promise<boolean | string>;
 }
 
 export interface AuthServiceInterface {
@@ -36,10 +38,12 @@ export interface AuthServiceInterface {
   comparePassword: (password: string, hashPassword: string) => boolean;
   verifyJwt: (token: string) => string | Jwt.JwtPayload;
   generateToken: (payload: JwtPayload) => string;
+  validateEmail: (email: string) => boolean;
 }
 export interface AuthServiceImpl {
   encryptPassword: (password: string) => string;
   comparePassword: (password: string, hashPassword: string) => boolean;
   verifyJwt: (token: string) => string | Jwt.JwtPayload;
   generateToken: (payload: JwtPayload) => string;
+  validateEmail: (email: string) => boolean;
 }
