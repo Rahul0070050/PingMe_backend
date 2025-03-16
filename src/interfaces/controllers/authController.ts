@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import ErrorResponse from "../../domain/responses/errorResponse";
 import { RegisterUser } from "../../application/use_case/auth/register";
-import { UserRepositoryImpl } from "../../infrastructure/repositories/userRpositoriesDb";
+import { UserRepositoryImpl } from "../../infrastructure/repositories/userRpositoriesImpl";
 import { AuthServiceImpl } from "../../infrastructure/services/authService";
 import { LoginUser } from "../../application/use_case/auth/login";
 
