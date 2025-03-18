@@ -9,4 +9,6 @@ const ChatModel = sequelize.define("Chat", {
   timestamp: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 });
 
+ChatModel.sync();
+
 export default ChatModel;

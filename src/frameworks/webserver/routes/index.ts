@@ -1,13 +1,13 @@
-import { RedisClientType } from "redis";
 import authRouter from "./auth";
 import userRouter from "./user";
-import { ExpressAppType, ExpressType } from "../../../types";
+import { ExpressAppType, ExpressType, ValkeyClient } from "../../../types";
+import { authMiddleware } from "../middlewares/auth";
 
 export default function routes(
   app: ExpressAppType,
   express: ExpressType,
-  redisClient: RedisClientType
+  valkeyClient: ValkeyClient
 ) {
   app.use("/api/v1/auth", authRouter(express));
-  app.use("/api/v1/user", userRouter(express, redisClient));
+  app.use("/api/v1/user", authMiddleware, userRouter(express, valkeyClient));
 }

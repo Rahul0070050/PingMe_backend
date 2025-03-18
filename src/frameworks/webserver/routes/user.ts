@@ -1,9 +1,8 @@
-import { RedisClientType } from "redis";
-import { ExpressType } from "../../../types";
+import { ExpressType, ValkeyClient } from "../../../types";
 
 export default function userRouter(
   express: ExpressType,
-  redisClient: RedisClientType
+  valkeyClient: ValkeyClient
 ) {
   const router = express.Router();
   return router;
