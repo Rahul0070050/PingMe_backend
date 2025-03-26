@@ -7,6 +7,7 @@ export type ExpressAppType = Express;
 export type ValkeyClient = Valkey;
 
 export type JwtPayload = {
+  id: string;
   username: string;
   email: string;
   phone: string;

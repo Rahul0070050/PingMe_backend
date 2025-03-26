@@ -3,9 +3,15 @@ import bodyParser from "body-parser";
 import compression from "compression";
 import helmet from "helmet";
 import morgan from "morgan";
+import cors from "cors";
 
 export default function expressConfig(app: Express) {
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    })
+  );
 
   app.use(compression());
   app.use(bodyParser.json({ limit: "50mb" }));
@@ -17,21 +23,13 @@ export default function expressConfig(app: Express) {
     })
   );
 
-  app.use((req, res, next) => {
-    // Website you wish to allow to connect
-    res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-    // Request methods you wish to allow
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-    );
-    // Request headers you wish to allow
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "X-Requested-With, Content-type, Authorization, Cache-control, Pragma"
-    );
-    // Pass to next layer of middleware
-    next();
-  });
+  app.use(
+    cors({
+      origin: "http://localhost:3000", // Ensure this matches frontend
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      credentials: true, // Allow cookies & auth headers
+    })
+  );
+
   app.use(morgan("combined"));
 }

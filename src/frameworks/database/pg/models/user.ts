@@ -27,14 +27,19 @@ const User = sequelize.define("User", {
     type: DataTypes.STRING,
   },
   phone: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     validate: {
-      min: 10,
+      len: [10, 10],
     },
   },
   bio: {
     type: DataTypes.TEXT,
     allowNull: true,
+  },
+  lastSeen: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: new Date().toLocaleDateString(),
   },
   website: {
     type: DataTypes.STRING,

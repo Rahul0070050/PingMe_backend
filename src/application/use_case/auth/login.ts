@@ -30,6 +30,7 @@ export class LoginUser {
       }
 
       const payload: JwtPayload = {
+        id: user.id,
         username: user.username,
         email: user.email,
         phone: user.phone,

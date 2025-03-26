@@ -106,4 +106,9 @@ export class UserRepositoryImpl implements UserRepository {
       return false;
     }
   };
+  getAllUsers = async (attributes: string[] = []) => {
+    return UserModel.findAll({
+      attributes,
+    });
+  };
 }

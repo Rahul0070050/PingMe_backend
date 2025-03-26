@@ -11,6 +11,8 @@ export default function authController() {
 
   const loginUser = async (req: Request, res: Response) => {
     try {
+      console.log("login");
+
       const { username, password } = req.body;
 
       if (!username || !password) {
@@ -26,7 +28,7 @@ export default function authController() {
         res.status(error.statusCode).json(error.toJSON());
         return;
       }
-      res.status(error.statusCode).json(error);
+      res.status(500).json(error);
     }
   };
 
@@ -47,7 +49,7 @@ export default function authController() {
         res.status(error.statusCode).json(error.toJSON());
         return;
       }
-      res.status(error.statusCode).json(error);
+      res.status(500).json(error);
     }
   };
 

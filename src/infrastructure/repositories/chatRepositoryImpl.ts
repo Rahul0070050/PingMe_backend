@@ -1,9 +1,22 @@
 import { ChatRepository } from "../../domain/repositories/ChatRepository";
 import { Chat } from "../../domain/entities/Chat";
 import ChatModel from "../../frameworks/database/pg/models/chat";
+import Valkey from "ioredis";
 
 export class ChatRepositoryImpl implements ChatRepository {
-  async saveMessage(chat: Chat): Promise<void> {
+  constructor(private cache: Valkey) {}
+  setSocketClientId(id: string, email: string): boolean {
+    return true;
+  }
+  async getSocketClientId(email: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      resolve("");
+    });
+  }
+  deleteSocketClientId(email: string): boolean {
+    return true;
+  }
+  async setMessage(chat: Chat): Promise<void> {
     await ChatModel.create({
       id: chat.id,
       senderId: chat.senderId,
