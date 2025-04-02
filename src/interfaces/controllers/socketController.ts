@@ -1,10 +1,9 @@
 import { Namespace, Server } from "socket.io";
 import { SendMessage } from "../../application/use_case/chat/sendMessage";
-import { Chat } from "../../domain/entities/Chat";
 import { ChatRepositoryImpl } from "../../infrastructure/repositories/chatRepositoryImpl";
-import { CacheService } from "../../infrastructure/services/casheService";
 import { valkey } from "../../frameworks/database/redis/connection";
 import { UserRepositoryImpl } from "../../infrastructure/repositories/userRpositoriesImpl";
+import { JwtPayload } from "../../types";
 
 interface MessageData {
   message: string;
@@ -95,36 +94,87 @@ const messages: MessageData[] = [
 ];
 
 export function initializeSocket(io: Server, userIo: Namespace) {
-  const messageRepository = new ChatRepositoryImpl(valkey);
+  const chatRepository = new ChatRepositoryImpl(valkey);
   const userRepository = new UserRepositoryImpl();
-  const sendMessageUseCase = new SendMessage(messageRepository);
-  const cacheService = new CacheService(valkey);
 
-  console.log("socketio init");
+  const sendMessageUseCase = new SendMessage(chatRepository);
 
   userIo.on("connection", (socket) => {
-    const user = socket.data.user;
-    console.log(`User connected: ${socket.id}`);
-    console.log(`user `, user);
-    // socket.emit("get-messages", messages);
-    socket.on("send-message", async (data) => {
-      const { receiverId, message } = data;
-      console.log(data);
+    const user: JwtPayload = socket.data.user;
+    // console.log(`User connected: ${socket.id}`);
+    // console.log(`User `, user.username);
 
-      // const chatMessage = new Chat(
-      //   data.id,
-      //   data.senderId,
-      //   data.receiverId,
-      //   data.content,
-      //   new Date()
-      // );
-      // await sendMessageUseCase.execute(message);
-      // io.to(data.receiverId).emit("receive_message", message);
+    socket.broadcast.emit("user-is-live", { userId: user.id });
+    chatRepository.setSocketClientId(user.id, socket.id);
+
+    socket.on("get-client-info", async (data, cb) => {
+      const { selectedUserId } = data;
+
+      const messages = await chatRepository.getMessages(
+        user.id,
+        selectedUserId,
+        0
+      );
+
+      // socket.to(socket.id).emit("get-messages", messages);
+
+      const userClientId = await chatRepository.getSocketClientId(
+        selectedUserId
+      );
+      if (userClientId) {
+        cb({ isOnline: true, userClientId, messages });
+        return;
+      } else {
+        const lastSeen = await userRepository.getUserLastSeen(selectedUserId);
+        cb({ isOnline: false, lastSeen, messages });
+        return;
+      }
+    });
+
+    socket.on("get-older-messages", async (data) => {
+      const { selectedUserId, limit: offset } = data;
+
+      const messages = await chatRepository.getMessages(
+        user.id,
+        selectedUserId,
+        offset
+      );
+      // console.log("messages ", messages.length);
+      socket.emit("get-older-messages", messages);
+    });
+
+    socket.on("send-message", async (data) => {
+      const { message, receiverId, date } = data;
+      // console.log("user ", user);
+      const userClientId = await chatRepository.getSocketClientId(receiverId);
+      // console.log("userClientId ", userClientId);
+
+      if (!userClientId) {
+        chatRepository.setMessageCache({
+          message,
+          receiverId,
+          senderId: user.id,
+          timestamp: date,
+        });
+      }
+      chatRepository.setMessage({
+        message,
+        receiverId,
+        senderId: user.id,
+        timestamp: date,
+      });
+      socket.to(userClientId).emit("get-message", [
+        {
+          message,
+          date,
+          receiverId,
+        },
+      ]);
     });
 
     socket.on("disconnect", () => {
-      // console.log(`User disconnected: ${user.id}`);
-      console.log(`User disconnected: ${socket.id}`);
+      userRepository.setUserLastSeen(user.id);
+      chatRepository.deleteSocketClientId(user.id);
     });
   });
 }

@@ -1,17 +1,16 @@
-import { Request, Response } from "express";
 import { UserRepositoryImpl } from "../../infrastructure/repositories/userRpositoriesImpl";
 import ErrorResponse from "../../domain/responses/errorResponse";
+import { UserRequest, UserResponse } from "../../types";
 
 export default function userController() {
   const userRepository = new UserRepositoryImpl();
-  const getAllUsers = async (req: Request, res: Response) => {
+  const getAllUsers = async (req: UserRequest, res: UserResponse) => {
     try {
-      const allUsers = await userRepository.getAllUsers([
-        "id",
-        "username",
-        "bio",
-        "profile",
-      ]);
+      if (!req.user) return;
+      const allUsers = await userRepository.getAllUsers(
+        ["id", "username", "bio", "profile", "lastSeen"],
+        req.user.id
+      );
       res.status(200).json(allUsers);
       return;
     } catch (error) {

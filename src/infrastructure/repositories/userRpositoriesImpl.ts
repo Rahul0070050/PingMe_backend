@@ -1,6 +1,7 @@
 import UserEntity from "../../domain/entities/user";
 import UserModel from "../../frameworks/database/pg/models/user";
 import { UserRepository } from "../../domain/repositories/userRepository";
+import { Op, where } from "sequelize";
 
 export class UserRepositoryImpl implements UserRepository {
   createUser = async (params: UserEntity) => {
@@ -106,9 +107,49 @@ export class UserRepositoryImpl implements UserRepository {
       return false;
     }
   };
-  getAllUsers = async (attributes: string[] = []) => {
+  getAllUsers = async (attributes: string[] = [], userId: string) => {
     return UserModel.findAll({
       attributes,
+      where: {
+        id: {
+          [Op.ne]: userId,
+        },
+      },
     });
+  };
+  setUserLastSeen = async (userId: string) => {
+    try {
+      await UserModel.update(
+        {
+          lastSeen: new Date().toLocaleTimeString(),
+        },
+        {
+          where: {
+            id: {
+              [Op.eq]: userId,
+            },
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error seting user last seen:", error);
+      return false;
+    }
+  };
+  getUserLastSeen = async (userId: string) => {
+    try {
+      const lastSeen = await UserModel.findOne({
+        attributes: ["lastSeen"],
+        where: {
+          id: {
+            [Op.eq]: userId,
+          },
+        },
+      });
+      return lastSeen?.getDataValue("lastSeen");
+    } catch (error) {
+      console.error("Error seting user last seen:", error);
+      return false;
+    }
   };
 }

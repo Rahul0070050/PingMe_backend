@@ -5,4 +5,6 @@ export interface UserRepository {
   findByEmail: (email: string) => Promise<UserEntity | null>;
   createUser: (params: UserEntity) => Promise<boolean>;
   updateUser: (params: UserEntity) => Promise<boolean>;
+  setUserLastSeen(userId: string): void;
+  getUserLastSeen(userId: string): Promise<string>;
 }

@@ -1,6 +1,5 @@
 import { Namespace, Server } from "socket.io";
 import { initializeSocket } from "../../../interfaces/controllers/socketController";
-import { AuthService } from "../../../domain/services/authService";
 import { AuthServiceImpl } from "../../../infrastructure/services/authService";
 import { JwtPayload } from "../../../types";
 
@@ -23,6 +22,7 @@ export class SocketService {
     this.userIo.use(async (socket, next) => {
       try {
         const token = socket.handshake.auth?.token;
+
         if (!token) {
           return next(new Error("Authentication error: No token provided"));
         }
@@ -33,6 +33,8 @@ export class SocketService {
         }
 
         const user = await this.authService.verifyJwt(token);
+        // console.log("from socket middlewere ", user);
+
         if (!user) {
           return next(new Error("Authentication error: Invalid token"));
         }

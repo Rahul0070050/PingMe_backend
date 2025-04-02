@@ -11,8 +11,6 @@ export default function authController() {
 
   const loginUser = async (req: Request, res: Response) => {
     try {
-      console.log("login");
-
       const { username, password } = req.body;
 
       if (!username || !password) {

@@ -39,7 +39,7 @@ const User = sequelize.define("User", {
   lastSeen: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: new Date().toLocaleDateString(),
+    defaultValue: new Date().toLocaleTimeString(),
   },
   website: {
     type: DataTypes.STRING,
