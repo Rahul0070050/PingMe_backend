@@ -25,7 +25,7 @@ export default function expressConfig(app: Express) {
 
   const allowedOrigins = [
     "http://localhost:3000",
-    "https://ping-me-snowy.vercel.app",
+    "https://ping-me-eta.vercel.app",
   ];
 
   app.use(

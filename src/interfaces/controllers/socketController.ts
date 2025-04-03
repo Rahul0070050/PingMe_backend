@@ -116,8 +116,6 @@ export function initializeSocket(io: Server, userIo: Namespace) {
         0
       );
 
-      // socket.to(socket.id).emit("get-messages", messages);
-
       const userClientId = await chatRepository.getSocketClientId(
         selectedUserId
       );
