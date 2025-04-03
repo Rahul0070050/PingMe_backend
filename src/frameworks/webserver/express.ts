@@ -23,9 +23,20 @@ export default function expressConfig(app: Express) {
     })
   );
 
+  const allowedOrigins = [
+    "http://localhost:3000",
+    "https://ping-me-snowy.vercel.app",
+  ];
+
   app.use(
     cors({
-      origin: ["http://localhost:3000", "https://ping-me-snowy.vercel.app"],
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
       credentials: true,
     })
