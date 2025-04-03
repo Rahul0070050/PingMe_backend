@@ -25,9 +25,9 @@ export default function expressConfig(app: Express) {
 
   app.use(
     cors({
-      origin: ["http://localhost:3000", "https://ping-me-snowy.vercel.app"], // Ensure this matches frontend
+      origin: ["http://localhost:3000", "https://ping-me-snowy.vercel.app"],
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-      credentials: true, // Allow cookies & auth headers
+      credentials: true,
     })
   );
 
