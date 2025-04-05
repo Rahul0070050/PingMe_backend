@@ -104,7 +104,12 @@ export function initializeSocket(io: Server, userIo: Namespace) {
     // console.log(`User connected: ${socket.id}`);
     // console.log(`User `, user.username);
 
-    socket.broadcast.emit("user-is-live", { userId: user.id });
+    socket.broadcast.emit("set-user-status", {
+      id: user.id,
+      userClientId: socket.id,
+      lastSeen: "",
+    });
+
     chatRepository.setSocketClientId(user.id, socket.id);
 
     socket.on("get-client-info", async (data, cb) => {
@@ -119,6 +124,9 @@ export function initializeSocket(io: Server, userIo: Namespace) {
       const userClientId = await chatRepository.getSocketClientId(
         selectedUserId
       );
+
+      socket.broadcast.emit("user-read-messages", { selectedUserId });
+
       if (userClientId) {
         cb({ isOnline: true, userClientId, messages });
         return;
@@ -137,15 +145,12 @@ export function initializeSocket(io: Server, userIo: Namespace) {
         selectedUserId,
         offset
       );
-      // console.log("messages ", messages.length);
       socket.emit("get-older-messages", messages);
     });
 
     socket.on("send-message", async (data) => {
-      const { message, receiverId, date } = data;
-      // console.log("user ", user);
+      const { message, receiverId, date, id } = data;
       const userClientId = await chatRepository.getSocketClientId(receiverId);
-      // console.log("userClientId ", userClientId);
 
       if (!userClientId) {
         chatRepository.setMessageCache({
@@ -154,23 +159,39 @@ export function initializeSocket(io: Server, userIo: Namespace) {
           senderId: user.id,
           timestamp: date,
         });
+        socket.emit("get-seen-messages", { id, seen: false });
       }
       chatRepository.setMessage({
         message,
         receiverId,
         senderId: user.id,
         timestamp: date,
+        seen: false,
       });
-      socket.to(userClientId).emit("get-message", [
-        {
-          message,
-          date,
-          receiverId,
-        },
-      ]);
+
+      socket.to(userClientId).emit("get-each-message", {
+        id,
+        message,
+        date,
+        receiverId,
+      });
+    });
+
+    socket.on("set-seen-messages", async (data) => {
+      const { id, userId } = data;
+      const userClientId = await chatRepository.getSocketClientId(userId);
+      if (userClientId) {
+        chatRepository.updateMessage(id);
+        socket.to(userClientId).emit("get-seen-messages", { id, seen: true });
+      }
     });
 
     socket.on("disconnect", () => {
+      socket.broadcast.emit("set-user-status", {
+        id: user.id,
+        userClientId: "",
+        lastSeen: new Date().toLocaleTimeString(),
+      });
       userRepository.setUserLastSeen(user.id);
       chatRepository.deleteSocketClientId(user.id);
     });

@@ -47,9 +47,30 @@ export class ChatRepositoryImpl implements ChatRepository {
         receiverId: chat.receiverId,
         message: chat.message,
         timestamp: chat.timestamp,
+        seen: chat.seen,
       });
     } catch (error) {
       console.error("Error setting message:", error);
+      throw error;
+    }
+  }
+
+  async updateMessage(id: string): Promise<void> {
+    try {
+      await ChatModel.update(
+        {
+          seen: true,
+        },
+        {
+          where: {
+            id: {
+              [Op.eq]: id,
+            },
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating message:", error);
       throw error;
     }
   }
@@ -78,7 +99,14 @@ export class ChatRepositoryImpl implements ChatRepository {
       );
 
       if (Array.isArray(cachedMessages)) {
-        return cachedMessages;
+        console.log("cache");
+
+        return cachedMessages.map((msg) => {
+          return {
+            ...msg,
+            seen: true,
+          };
+        });
       }
 
       const messages = await ChatModel.findAll({
@@ -100,9 +128,29 @@ export class ChatRepositoryImpl implements ChatRepository {
             msg.getDataValue("senderId"),
             msg.getDataValue("receiverId"),
             msg.getDataValue("message"),
-            msg.getDataValue("timestamp")
+            msg.getDataValue("timestamp"),
+            msg.getDataValue("seen")
           )
       );
+
+      const messageIds = chatMessages
+        .filter((msg) => !msg.seen && msg.senderId === receiverId)
+        .map((msg) => msg.id);
+
+      // console.log("messageIds ", messageIds);
+
+      if (messageIds.length) {
+        ChatModel.update(
+          { seen: true },
+          {
+            where: {
+              id: {
+                [Op.in]: messageIds,
+              },
+            },
+          }
+        );
+      }
 
       return chatMessages.reverse();
     } catch (error) {

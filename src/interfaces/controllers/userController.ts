@@ -21,6 +21,17 @@ export default function userController() {
       res.status(500).json(error);
     }
   };
+  const makeFriendRequst = (req: UserRequest, res: UserResponse) => {
+    try {
+      if (!req.user) return;
+    } catch (error) {
+      if (error instanceof ErrorResponse) {
+        res.status(error.statusCode).json(error.toJSON());
+        return;
+      }
+      res.status(500).json(error);
+    }
+  };
 
-  return { getAllUsers };
+  return { getAllUsers, makeFriendRequst };
 }

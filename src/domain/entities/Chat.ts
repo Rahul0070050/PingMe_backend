@@ -4,6 +4,7 @@ export class Chat {
     public senderId?: string,
     public receiverId?: string,
     public message?: string,
-    public timestamp: Date = new Date()
+    public timestamp: Date = new Date(),
+    public seen?: boolean
   ) {}
 }

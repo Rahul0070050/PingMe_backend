@@ -5,6 +5,7 @@ export interface ChatRepository {
   getSocketClientId(email: string): Promise<string>;
   deleteSocketClientId(email: string): Promise<boolean>;
   setMessage(chat: Chat): Promise<void>;
+  updateMessage(id: string): Promise<void>;
   getMessages(
     senderId: string,
     receiverId: string,

@@ -7,12 +7,16 @@ const ChatModel = sequelize.define("Chat", {
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
   },
+  seen: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
   senderId: { type: DataTypes.STRING, allowNull: false },
   receiverId: { type: DataTypes.STRING, allowNull: false },
   message: { type: DataTypes.TEXT, allowNull: false },
   timestamp: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 });
 
-ChatModel.sync();
+ChatModel.sync({ alter: true });
 
 export default ChatModel;

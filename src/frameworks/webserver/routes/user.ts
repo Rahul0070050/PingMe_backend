@@ -9,6 +9,7 @@ export default function userRouter(
   const controller = userController();
 
   router.get("/list", controller.getAllUsers);
+  router.post("/friend-requst", controller.makeFriendRequst);
 
   return router;
 }
